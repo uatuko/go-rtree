@@ -22,6 +22,10 @@ func NewNode( M uint16 ) ( *node ) {
 	}
 }
 
+func ( n *node ) Mbr() ( *geom.Rect ) {
+	return n.mbr
+}
+
 func ( n *node ) area() ( float64 ) {
 	if n.mbr == nil {
 		return 0
@@ -40,10 +44,7 @@ func ( n *node ) extend( r *geom.Rect ) {
 	if n.mbr == nil {
 		n.mbr = r
 	} else {
-		n.mbr.Min.X = math.Min( n.mbr.Min.X, r.Min.X )
-		n.mbr.Min.Y = math.Min( n.mbr.Min.Y, r.Min.Y )
-		n.mbr.Max.X = math.Max( n.mbr.Max.X, r.Max.X )
-		n.mbr.Max.Y = math.Max( n.mbr.Max.Y, r.Max.Y )
+		n.mbr.Extend( r )
 	}
 
 	if n.parent != nil && !n.parent.mbr.ContainsRect( n.mbr ) {
@@ -84,20 +85,106 @@ func ( n *node ) split() {
 		return
 	}
 
-	// TODO: choose split axis, choose split index, split
-	var rects []*geom.Rect
+	// sort
+	var itemsX []Item
 	if n.isLeaf() {
-		for _, item := range n.items {
-			rects = append( rects, item.Mbr() )
-		}
+		itemsX = n.items
 	} else {
-		for _, child := range n.children {
-			rects = append( rects, child.mbr )
+		itemsX = make( []Item, len( n.children ) )
+		for idx, child := range n.children {
+			itemsX[ idx ] = child
 		}
 	}
 
-	sx, sy := rects, rects
-	RectSortBy( RectSortMinX ).Sort( sx )
-	RectSortBy( RectSortMinY ).Sort( sy )
+	itemsY := itemsX
+	ItemSortBy( ItemSortMbrMinX ).Sort( itemsX )
+	ItemSortBy( ItemSortMbrMinY ).Sort( itemsY )
+
+	// choose split axis and split index
+	var splitAxis []Item
+	splitIdx, minMargin := uint16( 0 ), math.Inf( 0 )
+	for _, items := range [][]Item{ itemsX, itemsY } {
+		var margin float64 = 0
+		minOverlap, minArea := math.Inf( 0 ), math.Inf( 0 )
+		bestIdx := n.minEntries
+
+		for idx := n.minEntries; idx <= ( uint16( len( items ) ) - n.minEntries ); idx++ {
+			left := items[ 0 ].Mbr()
+			right := items[ len( items ) - 1 ].Mbr()
+
+			var i uint16
+			for i = 1; i < uint16( len( items ) - 1 ); i++ {
+				if i < idx {
+					left.Extend( items[ i ].Mbr() )
+				} else {
+					right.Extend( items[ i ].Mbr() )
+				}
+			}
+
+			margin += left.Margin() + right.Margin()
+			overlap := left.IntersectionArea( right )
+			area := left.Area() + right.Area()
+
+			if overlap < minOverlap || ( overlap == minOverlap && area < minArea ) {
+				minOverlap = overlap
+				minArea = area
+			}
+		}
+
+		if margin < minMargin {
+			splitIdx = bestIdx
+			splitAxis = items
+			minMargin = margin
+		}
+	}
+
+
+	// split
+	n.mbr = nil
+	nr := NewNode( n.maxEntries )
+	if n.isLeaf() {
+		n.items = make( []Item, splitIdx )
+		nr.items = make( []Item, uint16( len( splitAxis ) ) - splitIdx )
+	} else {
+		n.children = make( []*node, splitIdx )
+		nr.children = make( []*node, uint16( len( splitAxis ) ) - splitIdx )
+	}
+
+	for idx, item := range splitAxis {
+		if child, ok := item.( *node ); ok {
+			if uint16( idx ) < splitIdx {
+				n.children = append( n.children, child )
+				n.extend( child.Mbr() )
+			} else {
+				nr.children = append( nr.children, child )
+				nr.extend( child.Mbr() )
+			}
+		} else {
+			if uint16( idx ) < splitIdx {
+				n.items = append( n.items, item )
+				n.extend( item.Mbr() )
+			} else {
+				nr.items = append( nr.items, item )
+				nr.extend( item.Mbr() )
+			}
+		}
+	}
+
+
+	// create root if needed
+	if n.parent == nil {
+		parent := NewNode( n.maxEntries )
+		parent.children = append( parent.children, n )
+		parent.extend( n.Mbr() )
+		n.parent = parent
+	}
+
+	// update parent
+	nr.parent = n.parent
+	nr.parent.children = append( nr.parent.children, nr )
+	nr.parent.extend( nr.Mbr() )
+
+	// propergate changes upwards
+	nr.parent.split()
 }
 
