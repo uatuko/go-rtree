@@ -23,7 +23,7 @@ func ( tree *RTree ) Insert( item Item )  {
 	leaf.insert( item )
 }
 
-func ( tree *RTree ) Search( p *geom.Point ) ( []Item )  {
+func ( tree *RTree ) Search( p *geom.Point ) ( []Item, int )  {
 	n, nodes := tree.root, []*node{}
 	results := []Item{}
 	cost := 0
@@ -49,7 +49,7 @@ func ( tree *RTree ) Search( p *geom.Point ) ( []Item )  {
 		}
 	}
 
-	return results
+	return results, cost
 }
 
 func ( tree *RTree ) chooseLeaf( n *node, item Item ) ( *node ) {
