@@ -123,6 +123,7 @@ func ( n *node ) split() {
 			area := left.Area() + right.Area()
 
 			if overlap < minOverlap || ( overlap == minOverlap && area < minArea ) {
+				bestIdx = idx
 				minOverlap = overlap
 				minArea = area
 			}
