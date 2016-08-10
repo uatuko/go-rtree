@@ -3,6 +3,7 @@ package rtree
 
 import (
 	"math"
+	"github.com/nukedzn/go-rtree/geom"
 )
 
 type RTree struct {
@@ -22,8 +23,33 @@ func ( tree *RTree ) Insert( item Item )  {
 	leaf.insert( item )
 }
 
-func ( tree *RTree ) Search()  {
+func ( tree *RTree ) Search( p *geom.Point ) ( []Item )  {
+	n, nodes := tree.root, []*node{}
+	results := []Item{}
+	cost := 0
 
+	for n!= nil && n.Mbr().ContainsPoint( p ) {
+		cost++
+		if n.isLeaf() {
+			for _, item := range n.items {
+				if item.Mbr().ContainsPoint( p ) {
+					results = append( results, item )
+				}
+			}
+		} else {
+			for _, child := range n.children {
+				if child.Mbr().ContainsPoint( p ) {
+					nodes = append( nodes, child )
+				}
+			}
+		}
+
+		if n = nil; len( nodes ) > 0 {
+			n, nodes = nodes[0], nodes[1:]
+		}
+	}
+
+	return results
 }
 
 func ( tree *RTree ) chooseLeaf( n *node, item Item ) ( *node ) {
@@ -51,7 +77,7 @@ func ( tree *RTree ) chooseLeaf( n *node, item Item ) ( *node ) {
 
 		if chosen != nil {
 			n = chosen
-		} else {
+		} else if len( n.children ) > 0 {
 			n = n.children[0]
 		}
 	}

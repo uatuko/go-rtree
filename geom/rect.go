@@ -14,6 +14,13 @@ func ( r *Rect ) Area() ( float64 ) {
 	return ( r.Max.X - r.Min.X ) * ( r.Max.Y - r.Min.Y )
 }
 
+func ( r *Rect ) ContainsPoint( p *Point ) ( bool ) {
+	return r.Min.X <= p.X &&
+		r.Min.Y <= p.Y &&
+		r.Max.X >= p.X &&
+		r.Max.Y >= p.Y
+}
+
 func ( r *Rect ) ContainsRect( rect *Rect ) ( bool ) {
 	return r.Min.X <= rect.Min.X &&
 		r.Min.Y <= rect.Min.Y &&
@@ -35,7 +42,7 @@ func ( r *Rect ) Extendn( rects []*Rect ) {
 }
 
 func ( r *Rect ) IntersectionArea( rect *Rect ) ( float64 ) {
-	ri := Rect{}
+	ri := Rect{ &Point{}, &Point{} }
 	ri.Min.X = math.Max( r.Min.X, rect.Min.X )
 	ri.Min.Y = math.Max( r.Min.Y, rect.Min.Y )
 	ri.Max.X = math.Min( r.Max.X, rect.Max.X )

@@ -47,7 +47,7 @@ func ( n *node ) extend( r *geom.Rect ) {
 		n.mbr.Extend( r )
 	}
 
-	if n.parent != nil && !n.parent.mbr.ContainsRect( n.mbr ) {
+	if n.parent != nil {
 		n.parent.extend( n.mbr )
 	}
 }
@@ -60,11 +60,7 @@ func ( n *node ) insert( item Item ) {
 }
 
 func ( n *node ) isLeaf() ( bool ) {
-	if len( n.children ) == 0 {
-		return false
-	}
-
-	return true
+	return len( n.children ) == 0
 }
 
 func ( n *node ) mergedArea( r *geom.Rect ) ( float64 ) {
@@ -153,38 +149,43 @@ func ( n *node ) split() {
 	for idx, item := range splitAxis {
 		if child, ok := item.( *node ); ok {
 			if uint16( idx ) < splitIdx {
-				n.children = append( n.children, child )
+				n.children[ idx ] = child
 				n.extend( child.Mbr() )
 			} else {
-				nr.children = append( nr.children, child )
+				nr.children[ uint16( idx ) - splitIdx ] = child
 				nr.extend( child.Mbr() )
 			}
 		} else {
 			if uint16( idx ) < splitIdx {
-				n.items = append( n.items, item )
+				n.items[ idx ] = item
 				n.extend( item.Mbr() )
 			} else {
-				nr.items = append( nr.items, item )
+				nr.items[ uint16( idx ) - splitIdx ] = item
 				nr.extend( item.Mbr() )
 			}
 		}
 	}
 
 
-	// create root if needed
-	if n.parent == nil {
-		parent := NewNode( n.maxEntries )
-		parent.children = append( parent.children, n )
-		parent.extend( n.Mbr() )
+	// special handling for root node
+	parent := n.parent
+	if parent == nil {
+		parent = n
+		n := NewNode( n.maxEntries )
+		n.items, n.children = parent.items, parent.children
+		n.mbr = parent.mbr
 		n.parent = parent
+
+		parent.items = []Item{}
+		parent.children = []*node{ n }
 	}
 
 	// update parent
-	nr.parent = n.parent
+	nr.parent = parent
 	nr.parent.children = append( nr.parent.children, nr )
 	nr.parent.extend( nr.Mbr() )
 
 	// propergate changes upwards
-	nr.parent.split()
+	parent.split()
 }
 
