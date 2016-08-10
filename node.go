@@ -92,7 +92,8 @@ func ( n *node ) split() {
 		}
 	}
 
-	itemsY := itemsX
+	itemsY := make( []Item, len( itemsX ) )
+	copy( itemsY, itemsX )
 	ItemSortBy( ItemSortMbrMinX ).Sort( itemsX )
 	ItemSortBy( ItemSortMbrMinY ).Sort( itemsY )
 
