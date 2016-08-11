@@ -28,7 +28,7 @@ func ( tree *RTree ) Search( p *geom.Point ) ( []Item, int )  {
 	results := []Item{}
 	cost := 0
 
-	for n!= nil && n.Mbr().ContainsPoint( p ) {
+	for n != nil && n.Mbr().ContainsPoint( p ) {
 		cost++
 		if n.isLeaf() {
 			for _, item := range n.items {
@@ -75,11 +75,7 @@ func ( tree *RTree ) chooseLeaf( n *node, item Item ) ( *node ) {
 			}
 		}
 
-		if chosen != nil {
-			n = chosen
-		} else if len( n.children ) > 0 {
-			n = n.children[0]
-		}
+		n = chosen
 	}
 
 	return n
