@@ -173,9 +173,9 @@ func ( n *node ) split() {
 	parent := n.parent
 	if parent == nil {
 		parent = n
-		n := NewNode( n.maxEntries )
+		n = NewNode( n.maxEntries )
 		n.items, n.children = parent.items, parent.children
-		n.mbr = parent.mbr
+		n.mbr = geom.NewRectFromRect( parent.mbr )
 		n.parent = parent
 
 		parent.items = []Item{}
