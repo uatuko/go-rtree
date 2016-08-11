@@ -46,14 +46,14 @@ func ( n *node ) isLeaf() ( bool ) {
 }
 
 func ( n *node ) overlapCost( r *geom.Rect ) ( cost float64, area float64 ) {
-	var tmp *geom.Rect
-	if tmp = r; n.mbr != nil {
-		tmp = geom.NewRectFromRect( n.mbr )
-		tmp.Union( r )
+	var ru *geom.Rect
+	if ru = r; n.mbr != nil {
+		ru = geom.NewRectFromRect( n.mbr )
+		ru.Union( r )
 	}
 
-	area = n.area()
-	cost = tmp.Area() - area
+	area = ru.Area()
+	cost = area - n.area()
 	return
 }
 
