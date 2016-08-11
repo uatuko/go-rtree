@@ -91,8 +91,8 @@ func ( n *node ) split() {
 		bestIdx := n.minEntries
 
 		for idx := n.minEntries; idx <= ( uint16( len( items ) ) - n.minEntries ); idx++ {
-			left := items[ 0 ].Mbr()
-			right := items[ len( items ) - 1 ].Mbr()
+			left := geom.NewRectFromRect( items[ 0 ].Mbr() )
+			right := geom.NewRectFromRect( items[ len( items ) - 1 ].Mbr() )
 
 			var i uint16
 			for i = 1; i < uint16( len( items ) - 1 ); i++ {
