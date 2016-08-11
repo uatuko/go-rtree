@@ -2,6 +2,7 @@
 package geom
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -9,6 +10,11 @@ type Rect struct {
 	Min, Max *Point
 }
 
+
+func NewRectFromRect( r *Rect ) ( *Rect ) {
+	rr := &Rect{ &Point{ r.Min.X, r.Min.Y }, &Point{ r.Max.X, r.Max.Y } }
+	return rr
+}
 
 func ( r *Rect ) Area() ( float64 ) {
 	return ( r.Max.X - r.Min.X ) * ( r.Max.Y - r.Min.Y )
@@ -54,5 +60,9 @@ func ( r *Rect ) IntersectionArea( rect *Rect ) ( float64 ) {
 func ( r *Rect ) Margin() ( float64 ) {
 	// sum of edge lengths
 	return ( r.Max.X - r.Min.X ) + ( r.Max.Y - r.Min.Y )
+}
+
+func ( r *Rect ) String() ( string ) {
+	return fmt.Sprintf( "[%.6f, %.6f] x [%.6f, %.6f]", r.Min.X, r.Min.Y, r.Max.X, r.Max.Y )
 }
 
