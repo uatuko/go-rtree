@@ -60,18 +60,16 @@ func ( tree *RTree ) chooseLeaf( n *node, item Item ) ( *node ) {
 		var minCost, minArea float64 = math.Inf( 0 ), math.Inf( 0 )
 
 		for _, child := range n.children {
-			cost, area := child.areaCost( r )
+			cost, area := child.overlapCost( r )
 			if cost < minCost {
 				minCost = cost
 				chosen  = child
 				if area < minArea {
 					minArea = area
 				}
-			} else if cost == minCost {
-				if area < minArea {
-					minArea = area
-					chosen  = child
-				}
+			} else if cost == minCost && area < minArea {
+				minArea = area
+				chosen  = child
 			}
 		}
 

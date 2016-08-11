@@ -34,19 +34,6 @@ func ( r *Rect ) ContainsRect( rect *Rect ) ( bool ) {
 		r.Max.Y >= rect.Max.Y
 }
 
-func ( r *Rect ) Extend( rect *Rect ) {
-	r.Min.X = math.Min( r.Min.X, rect.Min.X )
-	r.Min.Y = math.Min( r.Min.Y, rect.Min.Y )
-	r.Max.X = math.Max( r.Max.X, rect.Max.X )
-	r.Max.Y = math.Max( r.Max.Y, rect.Max.Y )
-}
-
-func ( r *Rect ) Extendn( rects []*Rect ) {
-	for _, rect := range rects {
-		r.Extend( rect )
-	}
-}
-
 func ( r *Rect ) IntersectionArea( rect *Rect ) ( float64 ) {
 	ri := Rect{ &Point{}, &Point{} }
 	ri.Min.X = math.Max( r.Min.X, rect.Min.X )
@@ -64,5 +51,18 @@ func ( r *Rect ) Margin() ( float64 ) {
 
 func ( r *Rect ) String() ( string ) {
 	return fmt.Sprintf( "[%.6f, %.6f] x [%.6f, %.6f]", r.Min.X, r.Min.Y, r.Max.X, r.Max.Y )
+}
+
+func ( r *Rect ) Union( rect *Rect ) {
+	r.Min.X = math.Min( r.Min.X, rect.Min.X )
+	r.Min.Y = math.Min( r.Min.Y, rect.Min.Y )
+	r.Max.X = math.Max( r.Max.X, rect.Max.X )
+	r.Max.Y = math.Max( r.Max.Y, rect.Max.Y )
+}
+
+func ( r *Rect ) Unionn( rects []*Rect ) {
+	for _, rect := range rects {
+		r.Union( rect )
+	}
 }
 

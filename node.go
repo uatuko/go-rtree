@@ -34,27 +34,9 @@ func ( n *node ) area() ( float64 ) {
 	return n.mbr.Area()
 }
 
-func ( n *node ) areaCost( r *geom.Rect ) ( cost float64, area float64 ) {
-	area = n.area()
-	cost = n.mergedArea( r ) - area
-	return
-}
-
-func ( n *node ) extend( r *geom.Rect ) {
-	if n.mbr == nil {
-		n.mbr = r
-	} else {
-		n.mbr.Extend( r )
-	}
-
-	if n.parent != nil {
-		n.parent.extend( n.mbr )
-	}
-}
-
 func ( n *node ) insert( item Item ) {
 	r := item.Mbr()
-	n.extend( r )
+	n.union( r )
 	n.items = append( n.items, item )
 	n.split()
 }
@@ -63,13 +45,16 @@ func ( n *node ) isLeaf() ( bool ) {
 	return len( n.children ) == 0
 }
 
-func ( n *node ) mergedArea( r *geom.Rect ) ( float64 ) {
-	if n.mbr == nil {
-		return r.Area()
+func ( n *node ) overlapCost( r *geom.Rect ) ( cost float64, area float64 ) {
+	var tmp *geom.Rect
+	if tmp = r; n.mbr != nil {
+		tmp = geom.NewRectFromRect( n.mbr )
+		tmp.Union( r )
 	}
 
-	return ( math.Max( n.mbr.Max.X, r.Max.X ) - math.Min( n.mbr.Min.X, r.Min.X ) ) *
-		( math.Max( n.mbr.Max.Y, r.Max.Y ) - math.Min( n.mbr.Min.Y, r.Min.Y ) )
+	area = n.area()
+	cost = tmp.Area() - area
+	return
 }
 
 func ( n *node ) size() ( uint16 ) {
@@ -112,9 +97,9 @@ func ( n *node ) split() {
 			var i uint16
 			for i = 1; i < uint16( len( items ) - 1 ); i++ {
 				if i < idx {
-					left.Extend( items[ i ].Mbr() )
+					left.Union( items[ i ].Mbr() )
 				} else {
-					right.Extend( items[ i ].Mbr() )
+					right.Union( items[ i ].Mbr() )
 				}
 			}
 
@@ -152,18 +137,18 @@ func ( n *node ) split() {
 		if child, ok := item.( *node ); ok {
 			if uint16( idx ) < splitIdx {
 				n.children[ idx ] = child
-				n.extend( child.Mbr() )
+				n.union( child.Mbr() )
 			} else {
 				nr.children[ uint16( idx ) - splitIdx ] = child
-				nr.extend( child.Mbr() )
+				nr.union( child.Mbr() )
 			}
 		} else {
 			if uint16( idx ) < splitIdx {
 				n.items[ idx ] = item
-				n.extend( item.Mbr() )
+				n.union( item.Mbr() )
 			} else {
 				nr.items[ uint16( idx ) - splitIdx ] = item
-				nr.extend( item.Mbr() )
+				nr.union( item.Mbr() )
 			}
 		}
 	}
@@ -185,9 +170,21 @@ func ( n *node ) split() {
 	// update parent
 	nr.parent = parent
 	nr.parent.children = append( nr.parent.children, nr )
-	nr.parent.extend( nr.Mbr() )
+	nr.parent.union( nr.Mbr() )
 
 	// propergate changes upwards
 	parent.split()
+}
+
+func ( n *node ) union( r *geom.Rect ) {
+	if n.mbr == nil {
+		n.mbr = r
+	} else {
+		n.mbr.Union( r )
+	}
+
+	if n.parent != nil {
+		n.parent.union( n.mbr )
+	}
 }
 
