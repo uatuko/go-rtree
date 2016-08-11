@@ -68,8 +68,8 @@ func ( n *node ) mergedArea( r *geom.Rect ) ( float64 ) {
 		return r.Area()
 	}
 
-	return math.Max( n.mbr.Max.X, r.Max.X ) - math.Min( n.mbr.Min.X, r.Min.X ) *
-		math.Max( n.mbr.Max.Y, r.Max.Y ) - math.Min( n.mbr.Min.Y, r.Min.Y )
+	return ( math.Max( n.mbr.Max.X, r.Max.X ) - math.Min( n.mbr.Min.X, r.Min.X ) ) *
+		( math.Max( n.mbr.Max.Y, r.Max.Y ) - math.Min( n.mbr.Min.Y, r.Min.Y ) )
 }
 
 func ( n *node ) size() ( uint16 ) {
