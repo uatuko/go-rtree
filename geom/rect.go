@@ -50,7 +50,7 @@ func ( r *Rect ) Margin() ( float64 ) {
 }
 
 func ( r *Rect ) String() ( string ) {
-	return fmt.Sprintf( "[%.6f, %.6f] x [%.6f, %.6f]", r.Min.X, r.Min.Y, r.Max.X, r.Max.Y )
+	return fmt.Sprintf( "Rect{ [%.6f, %.6f] x [%.6f, %.6f] }", r.Min.X, r.Min.Y, r.Max.X, r.Max.Y )
 }
 
 func ( r *Rect ) Union( rect *Rect ) {

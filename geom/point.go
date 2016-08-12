@@ -11,6 +11,6 @@ type Point struct {
 
 
 func ( p *Point ) String() ( string ) {
-	return fmt.Sprintf( "[%.6f, %.6f]", p.X, p.Y )
+	return fmt.Sprintf( "Point{ [%.6f, %.6f] }", p.X, p.Y )
 }
 
