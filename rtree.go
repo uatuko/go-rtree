@@ -6,24 +6,24 @@ import (
 	"github.com/nukedzn/go-rtree/geom"
 )
 
-type RTree struct {
+type Rtree struct {
 	root *node
 }
 
 
-func NewRTree( maxNodeEntries uint16 ) ( *RTree ) {
-	tree := &RTree{
+func NewRtree( maxNodeEntries uint16 ) ( *Rtree ) {
+	tree := &Rtree{
 		root: NewNode( maxNodeEntries ),
 	}
 	return tree
 }
 
-func ( tree *RTree ) Insert( item Item )  {
+func ( tree *Rtree ) Insert( item Item )  {
 	leaf := tree.chooseLeaf( tree.root, item )
 	leaf.insert( item )
 }
 
-func ( tree *RTree ) Search( p *geom.Point ) ( []Item, int )  {
+func ( tree *Rtree ) Search( p *geom.Point ) ( []Item, int )  {
 	n, nodes := tree.root, []*node{}
 	results := []Item{}
 	cost := 0
@@ -52,7 +52,7 @@ func ( tree *RTree ) Search( p *geom.Point ) ( []Item, int )  {
 	return results, cost
 }
 
-func ( tree *RTree ) chooseLeaf( n *node, item Item ) ( *node ) {
+func ( tree *Rtree ) chooseLeaf( n *node, item Item ) ( *node ) {
 	r := item.Mbr()
 
 	for !n.isLeaf() {
