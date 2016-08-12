@@ -72,8 +72,8 @@ func ( n *node ) overlapCost( r *geom.Rect ) ( cost float64, area float64 ) {
 		ru.Union( r )
 	}
 
-	cost = 0
 	area = ru.Area() - n.area()
+	cost = area
 	for _, sibling := range n.siblings() {
 		cost += ru.IntersectionArea( sibling.mbr )
 	}
