@@ -2,7 +2,7 @@
 package rtree
 
 import (
-	"github.com/nukedzn/go-rtree/geom"
+	"github.com/uditha-atukorala/go-rtree/geom"
 )
 
 type Item interface {

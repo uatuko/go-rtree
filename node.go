@@ -3,7 +3,7 @@ package rtree
 
 import (
 	"math"
-	"github.com/nukedzn/go-rtree/geom"
+	"github.com/uditha-atukorala/go-rtree/geom"
 )
 
 type node struct {
