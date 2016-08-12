@@ -34,11 +34,31 @@ func ( n *node ) area() ( float64 ) {
 	return n.mbr.Area()
 }
 
+func ( n *node ) areaCost( r *geom.Rect ) ( cost float64, area float64 ) {
+	var ru *geom.Rect
+	if ru = r; n.mbr != nil {
+		ru = geom.NewRectFromRect( n.mbr )
+		ru.Union( r )
+	}
+
+	area = ru.Area()
+	cost = area - n.area()
+	return
+}
+
 func ( n *node ) insert( item Item ) {
 	r := item.Mbr()
 	n.union( r )
 	n.items = append( n.items, item )
 	n.split()
+}
+
+func ( n *node ) insertionCost( r *geom.Rect ) ( float64, float64 ) {
+	if !n.isLeaf() {
+		return n.areaCost( r )
+	}
+
+	return n.overlapCost( r )
 }
 
 func ( n *node ) isLeaf() ( bool ) {
@@ -52,9 +72,26 @@ func ( n *node ) overlapCost( r *geom.Rect ) ( cost float64, area float64 ) {
 		ru.Union( r )
 	}
 
-	area = ru.Area()
-	cost = area - n.area()
+	cost = 0
+	area = ru.Area() - n.area()
+	for _, sibling := range n.siblings() {
+		cost += ru.IntersectionArea( sibling.mbr )
+	}
 	return
+}
+
+func ( n *node ) siblings() ( []*node ) {
+	if n.parent == nil {
+		return []*node{}
+	}
+
+	var siblings []*node
+	for _, sibling := range n.parent.children {
+		if sibling != n {
+			siblings = append( siblings, sibling )
+		}
+	}
+	return siblings
 }
 
 func ( n *node ) size() ( uint16 ) {

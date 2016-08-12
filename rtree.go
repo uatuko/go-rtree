@@ -60,7 +60,7 @@ func ( tree *RTree ) chooseLeaf( n *node, item Item ) ( *node ) {
 		var minCost, minArea float64 = math.Inf( 0 ), math.Inf( 0 )
 
 		for _, child := range n.children {
-			cost, area := child.overlapCost( r )
+			cost, area := child.insertionCost( r )
 			if cost < minCost {
 				minCost = cost
 				chosen  = child
