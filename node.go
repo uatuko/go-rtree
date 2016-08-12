@@ -53,14 +53,6 @@ func ( n *node ) insert( item Item ) {
 	n.split()
 }
 
-func ( n *node ) insertionCost( r *geom.Rect ) ( float64, float64 ) {
-	if !n.isLeaf() {
-		return n.areaCost( r )
-	}
-
-	return n.overlapCost( r )
-}
-
 func ( n *node ) isLeaf() ( bool ) {
 	return len( n.children ) == 0
 }
