@@ -207,7 +207,7 @@ func ( n *node ) split() {
 
 func ( n *node ) union( r *geom.Rect ) {
 	if n.mbr == nil {
-		n.mbr = r
+		n.mbr = geom.NewRectFromRect( r )
 	} else {
 		n.mbr.Union( r )
 	}
